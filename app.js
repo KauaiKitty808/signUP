@@ -2,6 +2,8 @@
 const express = require('express');
 const app = express();
 const request = require('request');
+require('dotenv').config();
+const axios = require('axios')
 
 const bodyParser = require('body-parser');
 // create application/x-www-form-urlencoded parser
@@ -19,7 +21,7 @@ const port=3000;
 const mailchimp = require("@mailchimp/mailchimp_marketing");
 // const client = require("@mailchimp/mailchimp_marketing");
 
-const apiKey='1456b5ac8ff20d5b66f6ec3b7636550c-us11'
+console.log(`${process.env.LIST_ID_MC} :token: ${process.env.API_KEY_MC}`);
 
 
   /// Root Page /
@@ -36,13 +38,20 @@ app.post ('/',(req, res) => {
 
   console.log( `aloha ${name} your email is ${email} and you over 18? ${chkbx}`);
 
-/// mailchimp
+//
+// try{
+//   if (!process.env.API_KEY_MC){
+//     throw new Error (`You forgot to set the API KEY`);}
+//   };//end of try
+//   catch(err){next(err);};
+
+  /// mailchimp
 mailchimp.setConfig({
-  apiKey: "1456b5ac8ff20d5b66f6ec3b7636550c-us11",
+  apiKey: process.env.API_KEY_MC,
   server: "us11"
 });
 
-const listId = "6bd600877f";
+const listId = process.env.LIST_ID_MC;
 const subscribingUser = {
   firstName: name,
   email: email,
@@ -50,6 +59,7 @@ const subscribingUser = {
 };
 
 async function run() {
+
   const response = await mailchimp.lists.addListMember(listId, {
     email_address: subscribingUser.email,
     status: "subscribed",
@@ -70,6 +80,7 @@ async function run() {
   } else {
       res.sendFile(__dirname + "/failure.html")
     }
+
 
     // run.on("data", (data) => {
     // console.log(JSON.parse(Data) + "<-- HERE IT SHOULD BE");
